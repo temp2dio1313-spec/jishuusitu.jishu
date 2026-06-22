@@ -6,7 +6,7 @@
     <title>Study Room Timer</title>
     <style>
         :root {
-            --card-bg: rgba(42, 53, 48, 0.65); /* 背景を透かすために透明度を調整 */
+            --card-bg: rgba(42, 53, 48, 0.65);
             --text-main: #f4f1ea;
             --text-sub: #c3cfc7;
             --accent: #d4af37;
@@ -22,7 +22,6 @@
         }
 
         body {
-            /* 背景画像の設定 */
             background-image: url('jishuusitu.png');
             background-size: cover;
             background-position: center;
@@ -38,16 +37,15 @@
             position: relative;
         }
 
-        /* 背景が暗めの画像でも明るめの画像でも文字を読みやすくするためのオーバーレイ */
         body::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.35); /* 必要に応じて暗さを調整してください */
+            background: rgba(0, 0, 0, 0.35);
             z-index: 0;
         }
 
-        /* 音楽コントロールボタン（右上固定） */
+        /* 音楽コントロールボタン */
         .audio-control {
             position: fixed;
             top: 20px;
@@ -55,7 +53,7 @@
             z-index: 10;
             background: rgba(0, 0, 0, 0.5);
             border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 30px;
             cursor: pointer;
             color: var(--text-main);
@@ -71,12 +69,11 @@
 
         .container {
             position: relative;
-            z-index: 1; /* 背景オーバーレイより前に出す */
+            z-index: 1;
             width: 100%;
             max-width: 480px;
             background: var(--card-bg);
             
-            /* すりガラスエフェクト */
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             
@@ -96,11 +93,10 @@
             text-transform: uppercase;
         }
 
-        /* モード切り替えタブ */
         .tabs {
             display: flex;
             background: rgba(0, 0, 0, 0.3);
-            border-radius: 30px; /* より丸みを持たせてモダンに */
+            border-radius: 30px;
             padding: 4px;
             margin-bottom: 25px;
         }
@@ -124,10 +120,9 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
         }
 
-        /* タイマー表示部分 */
         .timer-display {
             font-size: 5rem;
-            font-weight: 100; /* さらに細くしてスタイリッシュに */
+            font-weight: 100;
             font-variant-numeric: tabular-nums;
             letter-spacing: 2px;
             margin: 15px 0;
@@ -143,7 +138,6 @@
             margin-bottom: 10px;
         }
 
-        /* カスタム入力フォーム */
         .custom-input-wrap {
             display: none;
             justify-content: center;
@@ -171,7 +165,6 @@
             border-color: var(--accent);
         }
 
-        /* コントロールボタン */
         .controls {
             display: flex;
             justify-content: center;
@@ -212,7 +205,6 @@
             transform: translateY(-1px);
         }
 
-        /* 記録ログ部分 */
         .log-section {
             margin-top: 30px;
             border-top: 1px solid rgba(255,255,255,0.15);
@@ -236,7 +228,6 @@
             font-size: 0.8rem;
         }
 
-        /* スクロールバーのカスタム */
         .log-list::-webkit-scrollbar {
             width: 5px;
         }
@@ -261,41 +252,33 @@
 </head>
 <body>
 
-<!-- オーディオ要素 (ループ再生有効) -->
 <audio id="bgm" src="jishuusitu.mp3" loop></audio>
 
-<!-- 右上の音楽管理ボタン -->
-<button class="audio-control" id="audioBtn" onclick="toggleBGM()">🎵 BGM: OFF</button>
+<button class="audio-control" id="audioBtn" onclick="toggleBGM()">BGM: OFF</button>
 
 <div class="container">
     <h1>Study Room</h1>
 
-    <!-- モード切り替え -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchMode('pomodoro')">ポモドーロ</button>
         <button class="tab-btn" onclick="switchMode('stopwatch')">ストップウォッチ</button>
         <button class="tab-btn" onclick="switchMode('custom')">カスタム</button>
     </div>
 
-    <!-- 状態表示 -->
     <div class="status-label" id="statusLabel">作業に移りましょう</div>
 
-    <!-- タイマー表示 -->
     <div class="timer-display" id="timerDisplay">25:00</div>
 
-    <!-- カスタムタイマー用入力 -->
     <div class="custom-input-wrap" id="customInputWrap">
         <input type="number" id="customMin" class="custom-input" min="1" max="180" value="45"> 分
         <button class="btn" style="padding: 5px 15px; min-width: auto; font-size: 0.8rem;" onclick="setCustomTime()">設定</button>
     </div>
 
-    <!-- 操作ボタン -->
     <div class="controls">
         <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">START</button>
         <button class="btn" id="resetBtn" onclick="resetTimer()">RESET</button>
     </div>
 
-    <!-- 勉強の記録 -->
     <div class="log-section">
         <div class="log-title">
             <span>本日のログ</span>
@@ -325,21 +308,19 @@
     const bgm = document.getElementById('bgm');
     const audioBtn = document.getElementById('audioBtn');
 
-    // BGMの再生・停止切り替え
     function toggleBGM() {
         if (bgm.paused) {
             bgm.play().then(() => {
-                audioBtn.textContent = '🎵 BGM: ON';
+                audioBtn.textContent = 'BGM: ON';
             }).catch(err => {
-                console.log("ブラウザの制限により自動再生がブロックされました。ユーザー操作が必要です。", err);
+                console.log("BGMの再生がブロックされました。", err);
             });
         } else {
             bgm.pause();
-            audioBtn.textContent = '🎵 BGM: OFF';
+            audioBtn.textContent = 'BGM: OFF';
         }
     }
 
-    // モード切り替え
     function switchMode(mode) {
         if (timerState === 'running') {
             if (!confirm('タイマーを停止してモードを切り替えますか？')) return;
@@ -389,11 +370,6 @@
     }
 
     function toggleTimer() {
-        // 初回スタート時にBGMを自動再生する親切設計（ブラウザの自動再生ブロック対策）
-        if (bgm.paused && audioBtn.textContent === '🎵 BGM: OFF') {
-            // 意図的にOFFにされた場合以外、勝手に流したくない場合はこの数行を消してください
-        }
-
         if (timerState === 'running') {
             clearInterval(intervalId);
             timerState = 'paused';
@@ -422,14 +398,14 @@
             if (currentMode === 'pomodoro') {
                 if (isPomoWork) {
                     addLog('ポモドーロ (作業)', initialSeconds);
-                    alert('お疲れ様です！25分間の集中が終了しました。5分間の休憩に入ります。');
+                    alert('お疲れ様です。25分間の集中が終了しました。5分間の休憩に入ります。');
                     isPomoWork = false;
                     timeLeft = 5 * 60;
                     statusLabel.textContent = 'ポモドーロ: 休憩 (5分)';
                     updateDisplay(timeLeft);
                     toggleTimer();
                 } else {
-                    alert('休憩が終了しました。次のサイクルを始めましょう！');
+                    alert('休憩が終了しました。次のサイクルを始めましょう。');
                     isPomoWork = true;
                     timeLeft = 25 * 60;
                     initialSeconds = timeLeft;
@@ -438,7 +414,7 @@
                 }
             } else if (currentMode === 'custom') {
                 addLog('カスタムタイマー', initialSeconds);
-                alert('設定した時間が経過しました！');
+                alert('設定した時間が経過しました。');
                 resetTimer();
             }
         }
