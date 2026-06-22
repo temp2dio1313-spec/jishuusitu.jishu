@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Room Timer</title>
+    <style>
+        :root {
+            --bg-color: #1e2622; /* 自習室の深いグリーンの壁・デスクライトをイメージ */
+            --card-bg: #2a3530;
+            --text-main: #f4f1ea; /* 目に優しいオフホワイト */
+            --text-sub: #a3b1a8;
+            --accent: #d4af37; /* 真鍮製のデスクライトのようなゴールド */
+            --accent-hover: #f1c40f;
+            --wood: #8e7355; /* 落ち着いた木製デスクのブラウン */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.05);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 30px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+        }
+
+        /* モード切り替えタブ */
+        .tabs {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 30px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            padding: 10px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: var(--wood);
+            color: var(--text-main);
+            font-weight: bold;
+        }
+
+        /* タイマー表示部分 */
+        .timer-display {
+            font-size: 4.5rem;
+            font-weight: 200;
+            font-variant-numeric: tabular-nums;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            color: var(--text-main);
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: var(--accent);
+            letter-spacing: 1px;
+            height: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* カスタム入力フォーム */
+        .custom-input-wrap {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .custom-input-wrap.show {
+            display: flex;
+        }
+
+        .custom-input {
+            background: rgba(0,0,0,0.2);
+            border: 1px solid var(--text-sub);
+            color: var(--text-main);
+            padding: 8px;
+            width: 70px;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        /* コントロールボタン */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            background: none;
+            border: 1px solid var(--text-sub);
+            color: var(--text-main);
+            padding: 12px 30px;
+            font-size: 0.95rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 110px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #1e2622;
+            font-weight: bold;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .btn:hover:not(.btn-primary) {
+            background: rgba(255,255,255,0.05);
+            border-color: var(--text-main);
+        }
+
+        /* 記録ログ部分 */
+        .log-section {
+            margin-top: 35px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 25px;
+            text-align: left;
+        }
+
+        .log-title {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .log-list {
+            list-style: none;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+        }
+
+        .log-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            color: var(--text-sub);
+        }
+
+        .log-item span:last-child {
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Study Room</h1>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchMode('pomodoro')">ポモドーロ</button>
+        <button class="tab-btn" onclick="switchMode('stopwatch')">ストップウォッチ</button>
+        <button class="tab-btn" onclick="switchMode('custom')">カスタム</button>
+    </div>
+
+    <div class="status-label" id="statusLabel">作業に移りましょう</div>
+
+    <div class="timer-display" id="timerDisplay">25:00</div>
+
+    <div class="custom-input-wrap" id="customInputWrap">
+        <input type="number" id="customMin" class="custom-input" min="0" max="180" value="45"> 分
+        <button class="btn" style="padding: 5px 15px; min-width: auto; font-size: 0.8rem;" onclick="setCustomTime()">設定</button>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary" id="startBtn" onclick="toggleTimer()">START</button>
+        <button class="btn" id="resetBtn" onclick="resetTimer()">RESET</button>
+    </div>
+
+    <div class="log-section">
+        <div class="log-title">
+            <span>本日のログ</span>
+            <span id="totalTime">総学習時間: 0分</span>
+        </div>
+        <ul class="log-list" id="logList">
+            </ul>
+    </div>
+</div>
+
+<script>
+    let currentMode = 'pomodoro'; // pomodoro, stopwatch, custom
+    let timerState = 'stopped'; // running, paused, stopped
+    let intervalId = null;
+    
+    // タイム管理用 (秒単位)
+    let timeLeft = 25 * 60; 
+    let stopwatchSeconds = 0;
+    let initialSeconds = 25 * 60; // ログ記録用
+    let isPomoWork = true; // ポモドーロの作業・休憩フラグ
+    let totalStudyMinutes = 0;
+
+    const display = document.getElementById('timerDisplay');
+    const startBtn = document.getElementById('startBtn');
+    const statusLabel = document.getElementById('statusLabel');
+    const customInputWrap = document.getElementById('customInputWrap');
+    const logList = document.getElementById('logList');
+    const totalTimeDisp = document.getElementById('totalTime');
+
+    // モード切り替え
+    function switchMode(mode) {
+        if (timerState === 'running') {
+            if (!confirm('タイマーを停止してモードを切り替えますか？')) return;
+        }
+        
+        currentMode = mode;
+        resetTimer();
+
+        // タブの活動状態更新
+        document.querySelectorAll('.tab-btn').forEach((btn, idx) => {
+            btn.classList.remove('active');
+            if((mode === 'pomodoro' && idx === 0) || (mode === 'stopwatch' && idx === 1) || (mode === 'custom' && idx === 2)) {
+                btn.classList.add('active');
+            }
+        });
+
+        // 画面表示の初期化
+        customInputWrap.classList.remove('show');
+        if (mode === 'pomodoro') {
+            timeLeft = 25 * 60;
+            initialSeconds = timeLeft;
+            isPomoWork = true;
+            statusLabel.textContent = 'ポモドーロ: 作業 (25分)';
+            updateDisplay(timeLeft);
+        } else if (mode === 'stopwatch') {
+            stopwatchSeconds = 0;
+            statusLabel.textContent = 'ストップウォッチ';
+            display.textContent = '00:00';
+        } else if (mode === 'custom') {
+            customInputWrap.classList.add('show');
+            statusLabel.textContent = '時間を設定してください';
+            setCustomTime();
+        }
+    }
+
+    // カスタム時間の設定
+    function setCustomTime() {
+        const min = parseInt(document.getElementById('customMin').value) || 0;
+        if (min <= 0) return;
+        timeLeft = min * 60;
+        initialSeconds = timeLeft;
+        statusLabel.textContent = `カスタムタイマー (${min}分)`;
+        updateDisplay(timeLeft);
+    }
+
+    // ディスプレイの更新
+    function updateDisplay(secs) {
+        const m = Math.floor(secs / 60).toString().padStart(2, '0');
+        const s = (secs % 60).toString().padStart(2, '0');
+        display.textContent = `${m}:${s}`;
+    }
+
+    // スタート・ポーズの切り替え
+    function toggleTimer() {
+        if (timerState === 'running') {
+            // パーズ処理
+            clearInterval(intervalId);
+            timerState = 'paused';
+            startBtn.textContent = 'RESUME';
+        } else {
+            // スタート処理
+            timerState = 'running';
+            startBtn.textContent = 'PAUSE';
+            
+            if (currentMode === 'stopwatch') {
+                intervalId = setInterval(runStopwatch, 1000);
+            } else {
+                intervalId = setInterval(runCountdown, 1000);
+            }
+        }
+    }
+
+    // カウントダウン処理 (ポモドーロ / カスタム)
+    function runCountdown() {
+        if (timeLeft > 0) {
+            timeLeft--;
+            updateDisplay(timeLeft);
+        } else {
+            clearInterval(intervalId);
+            timerState = 'stopped';
+            startBtn.textContent = 'START';
+            
+            // 終了時の処理
+            if (currentMode === 'pomodoro') {
+                if (isPomoWork) {
+                    addLog('ポモドーロ (作業)', initialSeconds);
+                    alert('お疲れ様です！25分間の集中が終了しました。5分間の休憩に入ります。');
+                    isPomoWork = false;
+                    timeLeft = 5 * 60;
+                    statusLabel.textContent = 'ポモドーロ: 休憩 (5分)';
+                    updateDisplay(timeLeft);
+                    toggleTimer(); // 自動で休憩スタート
+                } else {
+                    alert('休憩が終了しました。次のサイクルを始めましょう！');
+                    isPomoWork = true;
+                    timeLeft = 25 * 60;
+                    initialSeconds = timeLeft;
+                    statusLabel.textContent = 'ポモドーロ: 作業 (25分)';
+                    updateDisplay(timeLeft);
+                }
+            } else if (currentMode === 'custom') {
+                addLog('カスタムタイマー', initialSeconds);
+                alert('設定した時間が経過しました！');
+                resetTimer();
+            }
+        }
+    }
+
+    // ストップウォッチ処理
+    function runStopwatch() {
+        stopwatchSeconds++;
+        updateDisplay(stopwatchSeconds);
+    }
+
+    // リセット処理
+    function resetTimer() {
+        clearInterval(intervalId);
+        timerState = 'stopped';
+        startBtn.textContent = 'START';
+
+        if (currentMode === 'stopwatch') {
+            if (stopwatchSeconds > 0) {
+                addLog('ストップウォッチ', stopwatchSeconds);
+            }
+            stopwatchSeconds = 0;
+            display.textContent = '00:00';
+        } else if (currentMode === 'pomodoro') {
+            isPomoWork = true;
+            timeLeft = 25 * 60;
+            initialSeconds = timeLeft;
+            statusLabel.textContent = 'ポモドーロ: 作業 (25分)';
+            updateDisplay(timeLeft);
+        } else if (currentMode === 'custom') {
+            setCustomTime();
+        }
+    }
+
+    // ログに記録を追加
+    function addLog(modeName, seconds) {
+        const minutes = Math.round(seconds / 60);
+        if (minutes < 1 && currentMode === 'stopwatch') return; // 1分未満のストップウォッチは記録しない
+
+        const now = new Date();
+        const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        const li = document.createElement('li');
+        li.className = 'log-item';
+        li.innerHTML = `<span>[${timeStr}] ${modeName}</span> <span>+${minutes}分</span>`;
+        
+        logList.insertBefore(li, logList.firstChild);
+
+        // 総時間の更新
+        if (modeName !== 'ポモドーロ (休憩)') {
+            totalStudyMinutes += minutes;
+            totalTimeDisp.textContent = `総学習時間: ${totalStudyMinutes}分`;
+        }
+    }
+</script>
+
+</body>
+</html>
