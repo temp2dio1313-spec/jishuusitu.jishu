@@ -45,7 +45,31 @@
             z-index: 0;
         }
 
-        /* 音楽コントロールボタン */
+        /* 戻るボタン（左上固定） */
+        .back-control {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            color: var(--text-main);
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+            text-decoration: none;
+        }
+        .back-control:hover {
+            background: rgba(0, 0, 0, 0.7);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* 音楽コントロールボタン（右上固定） */
         .audio-control {
             position: fixed;
             top: 20px;
@@ -254,6 +278,8 @@
 
 <audio id="bgm" src="jishuusitu.mp3" loop></audio>
 
+<button class="back-control" onclick="goBack()">BACK</button>
+
 <button class="audio-control" id="audioBtn" onclick="toggleBGM()">BGM: OFF</button>
 
 <div class="container">
@@ -307,6 +333,16 @@
     const totalTimeDisp = document.getElementById('totalTime');
     const bgm = document.getElementById('bgm');
     const audioBtn = document.getElementById('audioBtn');
+
+    // 前のページに戻る関数
+    function goBack() {
+        if (timerState === 'running') {
+            if (!confirm('タイマーが動作中ですが、前のページに戻りますか？')) {
+                return;
+            }
+        }
+        window.history.back();
+    }
 
     function toggleBGM() {
         if (bgm.paused) {
